@@ -136,11 +136,12 @@ class Circuit:
         """
         Computes the gate operations and then returns the output.
         """   
-        garbledTables = {}
+        garbledTables = []
         
         # iterate through the gate operations
         for gate in self.gates:
             # load logic gate
+            gateTables = {}
             logic = getattr(self.logic,gate['type'])
             # generate permutations of inputs.    
             for binaryInputs in self.perms(len(gate['in'])):
@@ -167,7 +168,8 @@ class Circuit:
                 # generate dictionary entry
                 dictionaryInput = tuple(encryptedInput)
                 dictionaryOutput = (gate['id'],encryptedOutput)
-                garbledTables[dictionaryInput] = dictionaryOutput
+                gateTables[dictionaryInput] = dictionaryOutput
+            garbledTables.append(gateTables)
         return garbledTables
         
         
@@ -212,6 +214,7 @@ class Circuit:
             'aliceIn': encryptedBits,
             'aliceIndex' : self.alice,
             'bobIndex' : self.bob,
+            'bobP' : [self.p[k] for k in self.bob],
             'bobColouring' : bobColouringValues,
             'gateSet' : gateSet,
             'numberOfIndexes' : max([max(self.out),max([i['id'] for i in self.gates])]),
