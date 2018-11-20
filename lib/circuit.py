@@ -2,6 +2,7 @@ import os
 import json
 import gates as gate
 from cryptography.fernet import Fernet
+import fern
 import random
 import array
 
@@ -131,71 +132,42 @@ class Circuit:
                 self.printRow(alice,bob=None,encrypt=encrypt)
         print()
         
-    def fernetXOR(encryptedToken, p):
-        xoredTokenBits = []
-        for i in encryptedToken:
-            binary = i
-            newBinary = [XOR(int(binary[j]),p) for j in range(len(binary))]
-            newBinary = ''.join(str(i) for i in newBinary)
-            xoredTokenBits.append(newBinary)
-        return xoredTokenBits
-    
-    def encodeFernetXOR(token):
-        return ["{0:b}".format(i) for i in token]
-    
-    def decodeFernetXOR(ku):
-        ku = [int(m, 2) for m in ku]
-        ku = "".join(map(chr, ku))
-        return  ku.encode('utf-8')
-    
     def generateGarbledCiruitTables(self,encrypt=True):
         """
         Computes the gate operations and then returns the output.
         """   
-        garbledTables = []
+        garbledTables = {}
         
         # iterate through the gate operations
         for gate in self.gates:
-            garbledLogicGateTable = []
             # load logic gate
             logic = getattr(self.logic,gate['type'])
-                # generate permutations of inputs.
-                
-            for potentialInput in self.perms(len(gate['in'])):
-                
+            # generate permutations of inputs.    
+            for binaryInputs in self.perms(len(gate['in'])):
+    
                 encryptedInput = []
                 # encrypt the values with w, and then XOR with p.
                 for i in range(len(gate['in'])):
-                    wire, value = gate['in'][i], potentialInput[i]
-                    # xor with w[wire]
-                    encryptedValue = self.xor(value,self.w[wire][value])
-                    # xor with p[wire]
-                    encryptedValue = self.xor(encryptedValue,self.p[wire])
-                    encryptedInput.append(encryptedValue)
-                    
-                parameters = tuple(encryptedInput)  
+                    wire, value = gate['in'][i], binaryInputs[i]
+                    # set up the fern encryptor.
+                    value = self.xor(value,self.p[wire])
+                    encryptedValue = fern.encryptInput(self.w[wire][value], value)
+                    encryptedInput.append((wire,encryptedValue))
+                    # print result
+                    print("wire:", wire, "val:",value, " p["+str(wire)+"]:",self.p[wire], "w:", self.w[wire][value][-10:-2],"enc:",encryptedValue[-10:-2])
+                
+                # use the raw data as the tuple
+                parameters = tuple(binaryInputs)
                 # get output
                 result = logic(parameters)
+                # xor output with p value
+                xoredResult = self.xor(result, self.p[gate['id']])
                 # encrypt output
-                encryptedOutput = self.xor(result,self.p[gate['id']])
-                # generate dictionary to store.
-                entry = {'id': gate['id'], 'inputs' : [], 'outputs':[]}
-                for i in range(len(gate['in'])):
-                    entry['inputs'].append({
-                                  'wire':   gate['in'][i], 
-                        'encryptedValue':   parameters[i]
-                    })
-                # there should be only one output.
-                entry['outputs'].append({
-                              'wire':   gate['id'], 
-                    'encryptedValue':   encryptedOutput
-                })
-                
-                # add table row into our list
-                garbledLogicGateTable.append(entry)
-            # add our logic gate table to the main table
-            garbledTables.append(garbledLogicGateTable)
-
+                encryptedOutput = fern.encryptInput(self.w[gate['id']][result], xoredResult)
+                # generate dictionary entry
+                dictionaryInput = tuple(encryptedInput)
+                dictionaryOutput = (gate['id'],encryptedOutput)
+                garbledTables[dictionaryInput] = dictionaryOutput
         return garbledTables
         
         
@@ -207,19 +179,41 @@ class Circuit:
         # get alice's encrypted bits
         encryptedBits = []
         
+        if len(aliceInput) != len(self.alice):
+            print("Alice's inputs aren't the same size.")
+            return
+
+        print("Generating Alice's encrypted values.")
         for i in range(len(aliceInput)):
-            bit = self.xor(aliceInput[i], self.w[self.alice[i]][aliceInput[i]])
-            encryptedBits.append(bit)
+            aliceWire = self.alice[i]
+            aliceValue = aliceInput[i]
+            # xor before encryption..
+            aliceValue = self.xor(aliceValue, self.p[aliceWire])
+            encryptedValue = fern.encryptInput(self.w[aliceWire][aliceValue], aliceValue)
+            # print data
+            print("AWir:", aliceWire, "val:", aliceValue, " p["+str(aliceWire)+"]:", self.p[aliceWire], "w:",self.w[aliceWire][aliceValue][-10:-2], "enc:", encryptedValue[-10:-2])
+
+            encryptedBits.append(encryptedValue)
             
         # get decryption bit for output wire
         outputDecryptionBit = self.p[self.out[0]]
+
+        # setup gate construction (w/o the labels)
+        gateSet = self.gates.copy()
+        for i in range(len(gateSet)):
+            gateSet[i].pop('type', None)
         
+        # get the p values for wires corresponding to bob's inputs.
+        bobColouringValues = [self.p[i] for i in self.bob]
+
         return {
             'table'  : garbled,
             'w'      : w,
             'aliceIn': encryptedBits,
             'aliceIndex' : self.alice,
             'bobIndex' : self.bob,
+            'bobColouring' : bobColouringValues,
+            'gateSet' : gateSet,
             'numberOfIndexes' : max([max(self.out),max([i['id'] for i in self.gates])]),
             'outputDecryption': outputDecryptionBit
         }
