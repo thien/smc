@@ -11,12 +11,17 @@ for file in os.listdir(folderpath):
         json_circuits = json.load(json_file)
 
     for json_circuit in json_circuits['circuits']:
-        if "AND gate" == json_circuit['name']:
+        if "2-bit" in json_circuit['name']:
             circuit = c.Circuit(json_circuit)
-            print(json_circuit)
-            aliceInput = [1]
+            print("----------------")
+            print(json_circuit['name'])
+            print("Alice:",json_circuit['alice'],"\t","Bob:",json_circuit['bob'])
+            print("Generating Alice's Values")
+            aliceInput = [0,1,0]
+            print("Sending encrypted response to Bob")
             toBob = circuit.sendToBob(aliceInput)
-            bobInput = [1]
+            print("Generating Bob's Values")
+            bobInput = [1,1]
 
             output = bobHandler.bobHandler(toBob,inputs=bobInput)
             print("Alice:",aliceInput," Bob",bobInput,":- ",output)

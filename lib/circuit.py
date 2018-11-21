@@ -155,7 +155,7 @@ class Circuit:
                     encryptedValue = fern.encryptInput(self.w[wire][value], value)
                     encryptedInput.append((wire,encryptedValue))
                     # print result
-                    print("wire:", wire, "val:",value, " p["+str(wire)+"]:",self.p[wire], "w:", self.w[wire][value][-10:-2],"enc:",encryptedValue[-10:-2])
+                    # print("wire:", wire, "val:",value, " p["+str(wire)+"]:",self.p[wire], "w:", self.w[wire][value][-10:-2],"enc:",encryptedValue[-10:-2])
                 
                 # use the raw data as the tuple
                 parameters = tuple(binaryInputs)
@@ -185,7 +185,7 @@ class Circuit:
             print("Alice's inputs aren't the same size.")
             return
 
-        print("Generating Alice's encrypted values.")
+        # print("Generating Alice's encrypted values.")
         for i in range(len(aliceInput)):
             aliceWire = self.alice[i]
             aliceValue = aliceInput[i]
@@ -193,7 +193,7 @@ class Circuit:
             aliceValue = self.xor(aliceValue, self.p[aliceWire])
             encryptedValue = fern.encryptInput(self.w[aliceWire][aliceValue], aliceValue)
             # print data
-            print("AWir:", aliceWire, "val:", aliceValue, " p["+str(aliceWire)+"]:", self.p[aliceWire], "w:",self.w[aliceWire][aliceValue][-10:-2], "enc:", encryptedValue[-10:-2])
+            # print("AWir:", aliceWire, "val:", aliceValue, " p["+str(aliceWire)+"]:", self.p[aliceWire], "w:",self.w[aliceWire][aliceValue][-10:-2], "enc:", encryptedValue[-10:-2])
 
             encryptedBits.append(encryptedValue)
             
