@@ -41,35 +41,26 @@ def garbledTableHandler(inputs,store,garbledTable,w):
 
     return output
 
+def displayTables(table):
+    print("----------------")
+    print("Received Tables:")
+    for table in tables:
+        for i in table:
+            print((i[0][0],i[0][1][-10:-2]),(i[1][0],i[1][1][-10:-2]),":-", (table[i][0],table[i][1][-10:-2]))
+
+
 def bobHandler(data,inputs=[1]):
-    # 'table'  : garbled,
-    # 'w'      : w,
-    # 'aliceIn': encryptedBits,
-    # 'aliceIndex' : self.alice,
-    # 'bobIndex' : self.bob,
-    # 'numberOfIndexes' : number of indexes..
-    # 'outputDecryption': outputDecryptionBit
-    
+    # variables redeclared for simplicity    
     tables, w, aliceIn = data['table'], data['w'], data['aliceIn']
     aliceIndex, bobIndex = data['aliceIndex'], data['bobIndex'], 
     outputDecryption, gateSet = data['outputDecryption'], data['gateSet'],
     bobColouring = data['bobColouring']
     
-
-    # print("----------------")
-    # print("Received Tables:")
-    # for table in tables:
-    #     for i in table:
-    #         print((i[0][0],i[0][1][-10:-2]),(i[1][0],i[1][1][-10:-2]),":-", (table[i][0],table[i][1][-10:-2]))
-
-
- 
     # setup store.
     store = [0 for i in range(data['numberOfIndexes']+1)]
 
     # encrypt bob's input with the P's and store these values into our store.
     for i in range(len(inputs)):
-        # bob's index
         index = bobIndex[i]
         value = xor(data['bobP'][i],inputs[i])
         store[index]=value
@@ -100,15 +91,14 @@ def bobHandler(data,inputs=[1]):
         # store the output
         store[index] = value
 
-
-    decryptedOutputs = []
     # retrieve output and decrypt it.
+    decryptedOutputs = []
     for i in range(len(data['out'])):
         index = data['out'][i]
         value = store[index]
         pVal  = outputDecryption[i]
         decryptedValue = xor(value,pVal)
         decryptedOutputs.append(decryptedValue)
-    # print("Decrypted Output:", decryptedOutputs)
+
     return decryptedOutputs
     
