@@ -16,25 +16,7 @@ for file in os.listdir(folderpath):
             print(json_circuit)
             aliceInput = [1]
             toBob = circuit.sendToBob(aliceInput)
-            bobHandler.bobHandler(toBob)
-#         for i in circuit.generateGarbledCiruitTables():
-#             for j in i:
-#                 print(j)
+            bobInput = [1]
 
-#         key = Fernet.generate_key()
-#         f = Fernet(key)
-#         inpStr = b"my deep dark secret"
-#         token = f.encrypt(inpStr)
-#         print(token)
-#         col = circuit.computeWireColouring(token,1)
-#         print(col)
-#         colback = circuit.computeWireColouring(col,1)
-#         print(colback)
-#         print(circuit.w)
-#         print(circuit.p)
-#         circuit.printall()
-#         garble  = GarbledCircuit(circuit)
-#         print(circuit.raw)
-        # break
-    # break
-# loadall()
+            output = bobHandler.bobHandler(toBob,inputs=bobInput)
+            print("Alice:",aliceInput," Bob",bobInput,":- ",output)

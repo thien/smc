@@ -198,7 +198,7 @@ class Circuit:
             encryptedBits.append(encryptedValue)
             
         # get decryption bit for output wire
-        outputDecryptionBit = self.p[self.out[0]]
+        outputDecryptionBits = [self.p[i] for i in self.out]
 
         # setup gate construction (w/o the labels)
         gateSet = self.gates.copy()
@@ -218,7 +218,8 @@ class Circuit:
             'bobColouring' : bobColouringValues,
             'gateSet' : gateSet,
             'numberOfIndexes' : max([max(self.out),max([i['id'] for i in self.gates])]),
-            'outputDecryption': outputDecryptionBit
+            'out' : self.out,
+            'outputDecryption': outputDecryptionBits
         }
         
     @staticmethod
