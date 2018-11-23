@@ -1,4 +1,7 @@
-
+import util
+import  math
+import numpy as np
+from decimal import Decimal
 # yao garbled circuit evaluation v1. simple version based on smart
 # naranker dulay, dept of computing, imperial college, october 2018
 """
@@ -21,26 +24,28 @@ AIM: to carry out the core operations for oblivious transfer
 generate variable-length cryptographic hashes,
 do modular exponentiation on prime number groups)
 """
+class Ot:
 
-OBLIVIOUS_TRANSFERS = True
+    OBLIVIOUS_TRANSFERS = True
 
-if OBLIVIOUS_TRANSFERS:
-# __________________________________________________
+    if OBLIVIOUS_TRANSFERS:
+    # __________________________________________________
 
-# bellare-micali OT with naor and pinkas optimisations, see smart p423
+    # bellare-micali OT with naor and pinkas optimisations, see smart p423
 
-# << removed >>
-    print('OBLIVIOUS_TRANSFERS executing')
+    # << removed >>
+        print('OBLIVIOUS_TRANSFERS executing')
 
-else:
-# ____________________________________________________________________
 
-# non oblivious transfers, not even a secure channel is used, for testing
+    else:
+    # ____________________________________________________________________
 
-# << removed >>
+    # non oblivious transfers, not even a secure channel is used, for testing
 
-# __________________________________________________________________________
-    print('NON OBLIVIOUS_TRANSFERS executing')
+    # << removed >>
+
+    # __________________________________________________________________________
+        print('NON OBLIVIOUS_TRANSFERS executing')
 
 
 def generatePublicPrivateKeys():
@@ -62,5 +67,45 @@ def generatePublicPrivateKeys():
 # f = Fernet(key)
 # token = f.encrypt(b"A really secret message. Not for prying eyes.")
 
-print(type(generatePublicPrivateKeys()[1]))
+import sys
+print('size of int',sys.getsizeof(int(0)))
+
+G_sender = util.PrimeGroup()
+c = G_sender.rand_int()
+print(type(c))
+print('c is ', c)
+
+
+# c sned from sender to bob for this example b = 1
+
+G_rece = util.PrimeGroup()
+x = G_rece.primeM1
+print(type(x))
+print('x is ', x)
+
+g = G_rece.find_generator()
+print(type(g))
+print('g is ', g)
+
+h_b = pow(g, x, 2)
+h_1b = c//h_b
+print(type(h_b), type(h_1b))
+print('h_b is ', h_b, 'h_1b is ', h_1b)
+
+# h0 (h_1b) is send to sender
+h_0 = h_1b
+h_1 = c//h_0
+k = G_sender.primeM2
+c_1 =  pow(g,k,2)
+msg1 = b'message 1 by sender'
+msg2 = b'message 2 by sender'
+msg_length = 19
+e_0 = util.xor_bytes(msg1, util.ot_hash(pow(h_0, k, 2), msg_length))
+e_1 = util.xor_bytes(msg2, util.ot_hash(pow(h_1, k, 2), msg_length))
+
+
+#e0 e1 c1 send to receiver for this example b == 1
+m_1 =  util.xor_bytes(e_1, util.ot_hash(pow(c_1,x,2), msg_length))
+print(m_1.decode('ascii'))
+
 
