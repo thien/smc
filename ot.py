@@ -109,3 +109,4 @@ m_1 =  util.xor_bytes(e_1, util.ot_hash(pow(c_1,x,2), msg_length))
 print('the messgae that bob get is ', m_1.decode('ascii'))
 
 
+
