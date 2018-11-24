@@ -164,25 +164,28 @@ def generatePublicPrivateKeys():
 
 #---------------------------------------------------------------------------
 class Alice:
-    def __init__(self):
+    def __init__(self,msg1,msg2):
         self.G_sender = util.PrimeGroup()
+        self.msg1 = msg1
+        self.msg2 = msg2
 
     def send_c(self):
         #G_sender = util.PrimeGroup() # this need to be changed to self.
-        c = self.G_sender.rand_int()
-        print(type(c))
-        print('c is ', c)
+        self.c = self.G_sender.rand_int()
+        c = self.c
+        # print(type(c))
+        # print('c is ', c)
         return c
 
-    def sendMessage(self, h0, msg1, msg2):
+    def sendMessage(self, h0):
         # h0 (h_1b) is send to sender
         h_0 = h0
-        h_1 = self.G_sender.mul(c, self.G_sender.inv(h_0))
+        h_1 = self.G_sender.mul(self.c, self.G_sender.inv(h_0))
         k = self.G_sender.primeM1
         c_1 = self.G_sender.gen_pow(k)
-        msg1 = msg1.encode()  ## this should be your input message
-        msg2 = msg2.encode()
-        msg_length = len(msg1)
+        msg1 = self.msg1.encode()  ## this should be your input message
+        msg2 = self.msg1.encode()
+        msg_length = len(self.msg1)
         e_0 = util.xor_bytes(msg1, util.ot_hash(self.G_sender.pow(h_0, k), msg_length))
         e_1 = util.xor_bytes(msg2, util.ot_hash(self.G_sender.pow(h_1, k), msg_length))
         return c_1, [e_0, e_1],msg_length
@@ -197,17 +200,17 @@ class Bob:
 
     def send_h0(self, c):
         #G_rece = util.PrimeGroup()
-        print(type(self.x))
-        print('x is ', self.x)
+        # print(type(self.x))
+        # print('x is ', self.x)
 
         g = self.G_rece.find_generator()
-        print(type(g))
-        print('g is ', g)
+        # print(type(g))
+        # print('g is ', g)
 
         h_b = self.G_rece.gen_pow(self.x)
         h_1b = self.G_rece.mul(c, self.G_rece.inv(h_b))
-        print(type(h_b), type(h_1b))
-        print('h_b is ', h_b, 'h_1b is ', h_1b)
+        # print(type(h_b), type(h_1b))
+        # print('h_b is ', h_b, 'h_1b is ', h_1b)
 
         if self.choice == 0:
             return h_b
@@ -219,18 +222,20 @@ class Bob:
         return trueMessage
 
 
-bob = Bob(1)
-alice = Alice()
+if __name__ == "__main__":
 
-c = alice.send_c()
-h0 = bob.send_h0(c)
+    bob = Bob(1)
+    alice = Alice('Tian is cool', 'Jinn is cool')
 
-c_1, E, length = alice.sendMessage(h0, 'Tian is cool', 'Jinn is cool')
+    c = alice.send_c()
+    h0 = bob.send_h0(c)
 
-trueMsg = bob.getMessage(c_1,E, length)
+    c_1, E, length = alice.sendMessage(h0)
 
-# str = unicode(str, errors='replace')
+    trueMsg = bob.getMessage(c_1,E, length)
 
-print(trueMsg.decode())
+    # str = unicode(str, errors='replace')
+
+    print(trueMsg.decode())
 
 
