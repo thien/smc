@@ -5,6 +5,7 @@ from cryptography.fernet import Fernet
 import fern
 import random
 import array
+import copy
 
 class Circuit:
     def __init__(self,circuitDict, pBitOverride=None):
@@ -143,7 +144,9 @@ class Circuit:
         for gate in self.gates:
             # load logic gate
             gateTables = {}
+            # print(gate.keys())
             logic = getattr(self.logic,gate['type'])
+
             # generate permutations of inputs.    
             for binaryInputs in self.perms(len(gate['in'])):
 
@@ -172,16 +175,25 @@ class Circuit:
                 xoredResult = self.xor(result, self.p[gate['id']])
                 # encrypt output
                 encryptedOutput = fern.encryptInput(self.w[gate['id']][result], xoredResult)
+
+                # store result in ref key
+                refKey = (gate['id'], xoredResult)
+                if refKey not in refEncryption:
+                    refEncryption[refKey] = encryptedOutput
+                else:
+                    encryptedOutput = refEncryption[refKey]
+
                 # generate dictionary entry
                 dictionaryInput = tuple(encryptedInput)
                 dictionaryOutput = (gate['id'],encryptedOutput)
+
                 gateTables[dictionaryInput] = dictionaryOutput
             garbledTables.append(gateTables)
         return (garbledTables, refEncryption)
          
     def sendToBob(self,aliceInput):
         # garble the table
-        garbled, referenceTable = self.generateGarbledCiruitTables()
+        (garbled, referenceTable) = self.generateGarbledCiruitTables()
         # get wire keys
         w = self.w
         # get alice's encrypted bits
@@ -191,31 +203,30 @@ class Circuit:
             print("Alice's inputs aren't the same size.")
             return
 
-        aliceEncryptedBits = []
-        for i in range(len(aliceInput)):
-            aliceWire = self.alice[i]
-            aliceValue = aliceInput[i]
-            aliceValue = self.xor(aliceValue, self.p[aliceWire])
-            encryptedBit = referenceTable[(aliceWire, aliceValue)]
-            aliceEncryptedBits.append((aliceWire, encryptedBit))
-
-        # print("Generating Alice's encrypted values.")
+        # aliceEncryptedBits = []
         # for i in range(len(aliceInput)):
         #     aliceWire = self.alice[i]
         #     aliceValue = aliceInput[i]
-        #     # xor before encryption..
         #     aliceValue = self.xor(aliceValue, self.p[aliceWire])
-        #     encryptedValue = fern.encryptInput(self.w[aliceWire][aliceValue], aliceValue)
-        #     # print data
-        #     # print("AWir:", aliceWire, "val:", aliceValue, " p["+str(aliceWire)+"]:", self.p[aliceWire], "w:",self.w[aliceWire][aliceValue][-10:-2], "enc:", encryptedValue[-10:-2])
+        #     encryptedBit = referenceTable[(aliceWire, aliceValue)]
+        #     aliceEncryptedBits.append((aliceWire, encryptedBit))
 
-        #     encryptedBits.append(encryptedValue)
+        # print("Generating Alice's encrypted values.")
+        for i in range(len(aliceInput)):
+            aliceWire = self.alice[i]
+            aliceValue = aliceInput[i]
+            # xor before encryption..
+            aliceValue = self.xor(aliceValue, self.p[aliceWire])
+            encryptedValue = fern.encryptInput(self.w[aliceWire][aliceValue], aliceValue)
+            # print data
+            # print("AWir:", aliceWire, "val:", aliceValue, " p["+str(aliceWire)+"]:", self.p[aliceWire], "w:",self.w[aliceWire][aliceValue][-10:-2], "enc:", encryptedValue[-10:-2])
+            encryptedBits.append(encryptedValue)
             
         # get decryption bit for output wire
         outputDecryptionBits = [self.p[i] for i in self.out]
 
         # setup gate construction (w/o the labels)
-        gateSet = self.gates.copy()
+        gateSet = copy.deepcopy(self.gates)
         for i in range(len(gateSet)):
             gateSet[i].pop('type', None)
         
@@ -225,10 +236,9 @@ class Circuit:
         return {
             'table'  : garbled,
             'w'      : w,
-            'aliceIn': aliceEncryptedBits,
+            'aliceIn': encryptedBits,
             'aliceIndex' : self.alice,
             'bobIndex' : self.bob,
-            'bobP' : [self.p[k] for k in self.bob],
             'bobColouring' : bobColouringValues,
             'gateSet' : gateSet,
             'numberOfIndexes' : max([max(self.out),max([i['id'] for i in self.gates])]),
