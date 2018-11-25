@@ -138,6 +138,7 @@ class Circuit:
         """   
         garbledTables = []
         
+        refEncryption = {}
         # iterate through the gate operations
         for gate in self.gates:
             # load logic gate
@@ -145,14 +146,20 @@ class Circuit:
             logic = getattr(self.logic,gate['type'])
             # generate permutations of inputs.    
             for binaryInputs in self.perms(len(gate['in'])):
-    
+
                 encryptedInput = []
                 # encrypt the values with w, and then XOR with p.
                 for i in range(len(gate['in'])):
                     wire, value = gate['in'][i], binaryInputs[i]
                     # set up the fern encryptor.
                     value = self.xor(value,self.p[wire])
-                    encryptedValue = fern.encryptInput(self.w[wire][value], value)
+                    keypair = (wire,value)
+                    if keypair not in refEncryption:
+                        encryptedValue = fern.encryptInput(self.w[wire][value], value)
+                        refEncryption[keypair] = encryptedValue
+                    else:
+                        encryptedValue = refEncryption[keypair]
+
                     encryptedInput.append((wire,encryptedValue))
                     # print result
                     # print("wire:", wire, "val:",value, " p["+str(wire)+"]:",self.p[wire], "w:", self.w[wire][value][-10:-2],"enc:",encryptedValue[-10:-2])
@@ -170,12 +177,11 @@ class Circuit:
                 dictionaryOutput = (gate['id'],encryptedOutput)
                 gateTables[dictionaryInput] = dictionaryOutput
             garbledTables.append(gateTables)
-        return garbledTables
-        
-        
+        return (garbledTables, refEncryption)
+         
     def sendToBob(self,aliceInput):
         # garble the table
-        garbled = self.generateGarbledCiruitTables()
+        garbled, referenceTable = self.generateGarbledCiruitTables()
         # get wire keys
         w = self.w
         # get alice's encrypted bits
@@ -185,17 +191,25 @@ class Circuit:
             print("Alice's inputs aren't the same size.")
             return
 
-        # print("Generating Alice's encrypted values.")
+        aliceEncryptedBits = []
         for i in range(len(aliceInput)):
             aliceWire = self.alice[i]
             aliceValue = aliceInput[i]
-            # xor before encryption..
             aliceValue = self.xor(aliceValue, self.p[aliceWire])
-            encryptedValue = fern.encryptInput(self.w[aliceWire][aliceValue], aliceValue)
-            # print data
-            # print("AWir:", aliceWire, "val:", aliceValue, " p["+str(aliceWire)+"]:", self.p[aliceWire], "w:",self.w[aliceWire][aliceValue][-10:-2], "enc:", encryptedValue[-10:-2])
+            encryptedBit = referenceTable[(aliceWire, aliceValue)]
+            aliceEncryptedBits.append((aliceWire, encryptedBit))
 
-            encryptedBits.append(encryptedValue)
+        # print("Generating Alice's encrypted values.")
+        # for i in range(len(aliceInput)):
+        #     aliceWire = self.alice[i]
+        #     aliceValue = aliceInput[i]
+        #     # xor before encryption..
+        #     aliceValue = self.xor(aliceValue, self.p[aliceWire])
+        #     encryptedValue = fern.encryptInput(self.w[aliceWire][aliceValue], aliceValue)
+        #     # print data
+        #     # print("AWir:", aliceWire, "val:", aliceValue, " p["+str(aliceWire)+"]:", self.p[aliceWire], "w:",self.w[aliceWire][aliceValue][-10:-2], "enc:", encryptedValue[-10:-2])
+
+        #     encryptedBits.append(encryptedValue)
             
         # get decryption bit for output wire
         outputDecryptionBits = [self.p[i] for i in self.out]
@@ -211,7 +225,7 @@ class Circuit:
         return {
             'table'  : garbled,
             'w'      : w,
-            'aliceIn': encryptedBits,
+            'aliceIn': aliceEncryptedBits,
             'aliceIndex' : self.alice,
             'bobIndex' : self.bob,
             'bobP' : [self.p[k] for k in self.bob],
@@ -219,7 +233,8 @@ class Circuit:
             'gateSet' : gateSet,
             'numberOfIndexes' : max([max(self.out),max([i['id'] for i in self.gates])]),
             'out' : self.out,
-            'outputDecryption': outputDecryptionBits
+            'outputDecryption': outputDecryptionBits,
+            'referenceTable' : referenceTable
         }
         
     @staticmethod

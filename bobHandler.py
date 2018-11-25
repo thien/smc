@@ -59,37 +59,53 @@ def bobHandler(data,inputs=[1]):
     # setup store.
     store = [0 for i in range(data['numberOfIndexes']+1)]
 
+    # store alices input in the store array.
+    # for i in range(len(aliceIndex)):
+    #     # bruteforce the table to find the matching key corresponding to
+    #     # alice's encrypted input.
+    #     for wAttempt in w[aliceIndex[i]]:
+    #         try:
+    #             value = int(fern.decryptInput(wAttempt,aliceIn[i]))
+    #             index = aliceIndex[i]
+    #             store[index] = value
+    #         except:
+    #             pass
+    for i in aliceIn:
+        store[i[0]] = i[1]
+
     # encrypt bob's input with the P's and store these values into our store.
     for i in range(len(inputs)):
         index = bobIndex[i]
-        value = xor(data['bobP'][i],inputs[i])
+        value = inputs[i]
         store[index]=value
 
-    # store alices input in the store array.
-    for i in range(len(aliceIndex)):
-        # bruteforce the table to find the matching key corresponding to
-        # alice's encrypted input.
-        for wAttempt in w[aliceIndex[i]]:
-            try:
-                value = int(fern.decryptInput(wAttempt,aliceIn[i]))
-                index = aliceIndex[i]
-                store[index] = value
-            except:
-                pass
-
-    # iterate through the gates
     for i in range(len(gateSet)):
         # get gate value.
         gate = gateSet[i]
-        # initialise inputs
-        inputs = [(i,store[i]) for i in gate['in']]
-        # get garbled table for this gate
         table = tables[i]
-        # compute value
-        value = garbledTableHandler(inputs,store,table,w)
+        # get gate id
         index = gate['id']
-        # store the output
-        store[index] = value
+        # get inputs
+        inputs = tuple([(i,store[i]) for i in gate['in']])
+
+        print(table.keys())
+        output = table[inputs]
+        # store output
+        store[index] = output
+
+    # # iterate through the gates
+    # for i in range(len(gateSet)):
+    #     # get gate value.
+    #     gate = gateSet[i]
+    #     # initialise inputs
+    #     inputs = [(i,store[i]) for i in gate['in']]
+    #     # get garbled table for this gate
+    #     table = tables[i]
+    #     # compute value
+    #     value = garbledTableHandler(inputs,store,table,w)
+    #     index = gate['id']
+    #     # store the output
+    #     store[index] = value
 
     # retrieve output and decrypt it.
     decryptedOutputs = []

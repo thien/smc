@@ -183,8 +183,10 @@ class Alice:
         h_1 = self.G_sender.mul(self.c, self.G_sender.inv(h_0))
         k = self.G_sender.primeM1
         c_1 = self.G_sender.gen_pow(k)
-        msg1 = self.msg1.encode()  ## this should be your input message
-        msg2 = self.msg1.encode()
+        # msg1 = self.msg1.encode()  ## this should be your input message
+        # msg2 = self.msg1.encode()
+        msg1 = self.msg1
+        msg2 = self.msg2
         msg_length = len(self.msg1)
         e_0 = util.xor_bytes(msg1, util.ot_hash(self.G_sender.pow(h_0, k), msg_length))
         e_1 = util.xor_bytes(msg2, util.ot_hash(self.G_sender.pow(h_1, k), msg_length))
