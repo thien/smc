@@ -48,22 +48,27 @@ def displayTables(table):
         for i in table:
             print((i[0][0],i[0][1][-10:-2]),(i[1][0],i[1][1][-10:-2]),":-", (table[i][0],table[i][1][-10:-2]))
 
-
-def bobHandler(data,inputs=[1]):
+def bobHandler(data,inputs=[1], pinputs=None):
     # variables redeclared for simplicity    
     tables, w, aliceIn = data['table'], data['w'], data['aliceIn']
-    aliceIndex, bobIndex = data['aliceIndex'], data['bobIndex'], 
-    outputDecryption, gateSet = data['outputDecryption'], data['gateSet'],
-    bobColouring = data['bobColouring']
+    aliceIndex, bobIndex = data['aliceIndex'], data['bobIndex']
+    outputDecryption, gateSet = data['outputDecryption'], data['gateSet']
     
     # setup store.
     store = [0 for i in range(data['numberOfIndexes']+1)]
 
-    # encrypt bob's input with the P's and store these values into our store.
-    for i in range(len(inputs)):
-        index = bobIndex[i]
-        value = xor(data['bobP'][i],inputs[i])
-        store[index]=value
+    if pinputs:
+        for i in range(len(pinputs)):
+            value = pinputs[i]
+            index = bobIndex[i]
+            store[index] = value
+    else:
+        # encrypt bob's input with the P's and store these values into our store.
+        # for i in range(len(inputs)):
+        #     index = bobIndex[i]
+        #     value = xor(data['bobP'][i],inputs[i])
+        #     store[index]=value
+        print("?")
 
     # store alices input in the store array.
     for i in range(len(aliceIndex)):

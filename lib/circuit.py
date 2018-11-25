@@ -5,6 +5,7 @@ from cryptography.fernet import Fernet
 import fern
 import random
 import array
+import copy
 
 class Circuit:
     def __init__(self,circuitDict, pBitOverride=None):
@@ -201,12 +202,28 @@ class Circuit:
         outputDecryptionBits = [self.p[i] for i in self.out]
 
         # setup gate construction (w/o the labels)
-        gateSet = self.gates.copy()
+        gateSet = copy.deepcopy(self.gates)
         for i in range(len(gateSet)):
             gateSet[i].pop('type', None)
         
         # get the p values for wires corresponding to bob's inputs.
         bobColouringValues = [self.p[i] for i in self.bob]
+
+        # setup bob p
+        bobP = [self.p[k] for k in self.bob]
+
+        # generate p encrypted values for all of bob's possible inputs.
+        bobPossibleInputs = self.perms(len(self.bob))
+        bobPotentialP = {}
+        for inp in bobPossibleInputs:
+            P_enc = []
+            for index in range(len(self.bob)):
+                pValue = bobP[index]
+                value = inp[index]
+                encryptedValue = self.xor(pValue, value)
+                P_enc.append(encryptedValue)
+            rawInpt = tuple(inp)
+            bobPotentialP[rawInpt] = P_enc
 
         return {
             'table'  : garbled,
@@ -214,8 +231,7 @@ class Circuit:
             'aliceIn': encryptedBits,
             'aliceIndex' : self.alice,
             'bobIndex' : self.bob,
-            'bobP' : [self.p[k] for k in self.bob],
-            'bobColouring' : bobColouringValues,
+            'bobPotentialP' : bobPotentialP,
             'gateSet' : gateSet,
             'numberOfIndexes' : max([max(self.out),max([i['id'] for i in self.gates])]),
             'out' : self.out,
