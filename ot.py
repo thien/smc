@@ -31,8 +31,6 @@ class Alice:
         e_1 = util.xor_bytes(msg2, util.ot_hash(self.G_sender.pow(h_1, k), msg_length))
         return c_1, [e_0, e_1],msg_length
 
-
-
 class Bob:
     def __init__(self, choice):
         self.G_rece = util.PrimeGroup()
@@ -62,11 +60,9 @@ class Bob:
         trueMessage = util.xor_bytes(encryMsg[self.choice], util.ot_hash(pow(c_1, self.x, 2), msg_length))
         return trueMessage
 
-
-if __name__ == "__main__":
-
+def test():
     bob = Bob(1)
-    alice = Alice('Tian is cool', 'Jinn is cool')
+    alice = Alice(b'Tian is cool', b'Jinn is cool')
 
     c = alice.send_c()
     h0 = bob.send_h0(c)
@@ -80,3 +76,7 @@ if __name__ == "__main__":
     print(trueMsg.decode())
 
 
+
+if __name__ == "__main__":
+    for i in range(10):
+        test()

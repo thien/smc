@@ -11,17 +11,17 @@ for file in os.listdir(folderpath):
         json_circuits = json.load(json_file)
 
     for json_circuit in json_circuits['circuits']:
-        if "NAND gate" in json_circuit['name']:
+        if "AND gate" in json_circuit['name']:
             circuit = c.Circuit(json_circuit)
             print("----------------")
             print(json_circuit['name'])
             print("Alice:",json_circuit['alice'],"\t","Bob:",json_circuit['bob'])
             print("Generating Alice's Values")
-            aliceInput = [1]
+            aliceInput = [0]
             print("Sending encrypted response to Bob")
             toBob = circuit.sendToBob(aliceInput)
             print("Generating Bob's Values")
-            bobInput = [1]
+            bobInput = [0]
 
 
             for i in toBob['table'][0].keys():

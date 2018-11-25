@@ -76,7 +76,7 @@ class Circuit:
         # assign values.
         self.w = w
     
-    def generatePBits(self, override=None):
+    def generatePBits(self, override=None, kill=False):
         """
         generates random p bits.
         these are the colouring bits on each wire.
@@ -90,6 +90,8 @@ class Circuit:
             print("YOUR P BITS WONT WORK.")
         # generate arbitary zeros and ones
         w = [random.choice([0,1]) for i in range(wire_count+1)]
+        if kill:
+            w = [0 for i in range(wire_count+1)]
         self.p = w
     
     def printRow(self, alice, bob, encrypt=False):
@@ -177,11 +179,11 @@ class Circuit:
                 encryptedOutput = fern.encryptInput(self.w[gate['id']][result], xoredResult)
 
                 # store result in ref key
-                refKey = (gate['id'], xoredResult)
-                if refKey not in refEncryption:
-                    refEncryption[refKey] = encryptedOutput
-                else:
-                    encryptedOutput = refEncryption[refKey]
+                # refKey = (gate['id'], xoredResult)
+                # if refKey not in refEncryption:
+                #     refEncryption[refKey] = encryptedOutput
+                # else:
+                #     encryptedOutput = refEncryption[refKey]
 
                 # generate dictionary entry
                 dictionaryInput = tuple(encryptedInput)
@@ -212,12 +214,16 @@ class Circuit:
         #     aliceEncryptedBits.append((aliceWire, encryptedBit))
 
         # print("Generating Alice's encrypted values.")
+        # print("ALICE INPUTS:", aliceInput)
+        # print("P:",self.p)
         for i in range(len(aliceInput)):
             aliceWire = self.alice[i]
             aliceValue = aliceInput[i]
             # xor before encryption..
             aliceValue = self.xor(aliceValue, self.p[aliceWire])
             encryptedValue = fern.encryptInput(self.w[aliceWire][aliceValue], aliceValue)
+
+            print("alice before w:", aliceWire, "v:", aliceValue, "v':", aliceValue)
             # print data
             # print("AWir:", aliceWire, "val:", aliceValue, " p["+str(aliceWire)+"]:", self.p[aliceWire], "w:",self.w[aliceWire][aliceValue][-10:-2], "enc:", encryptedValue[-10:-2])
             encryptedBits.append(encryptedValue)
@@ -242,8 +248,8 @@ class Circuit:
             'bobColouring' : bobColouringValues,
             'gateSet' : gateSet,
             'numberOfIndexes' : max([max(self.out),max([i['id'] for i in self.gates])]),
-            'out' : self.out,
-            'outputDecryption': outputDecryptionBits,
+            'outIndex' : self.out,
+            'outputP': outputDecryptionBits,
             'referenceTable' : referenceTable
         }
         

@@ -38,6 +38,7 @@ def garbledTableHandler(inputs,store,garbledTable,w):
             # print("garbled table:",garbledTable[row])
             index, token = garbledTable[row]
             output = bruteForceDecrypt(w[index],token)
+            # print("brute force output for index:",index, output)
             if output > -1:
                 break
 
@@ -55,60 +56,23 @@ def bobHandler(data,inputs=[1]):
     # variables redeclared for simplicity    
     tables, w, aliceIn = data['table'], data['w'], data['aliceIn']
     aliceIndex, bobIndex = data['aliceIndex'], data['bobIndex'], 
-    outputDecryption, gateSet = data['outputDecryption'], data['gateSet'],
+    outputP, gateSet = data['outputP'], data['gateSet'],
     bobColouring = data['bobColouring']
     
     # setup store.
     store = [0 for i in range(data['numberOfIndexes']+1)]
-
+   
     # store alices input in the store array.
-    # print("aliceIn", aliceIn)
     for i in range(len(aliceIndex)):
-        # print("i",i)
-        # bruteforce the table to find the matching key corresponding to
-        # alice's encrypted input.
-        for wAttempt in w[aliceIndex[i]]:
-            # print("wAttempt", wAttempt)
-            try:
-                value = int(fern.decryptInput(wAttempt,aliceIn[i]))
-                # print(value, "WINNER")
-                index = aliceIndex[i]
-                store[index] = value
-            except:
-                pass
-
-    # print("Store before:", store)
-    # for i in aliceIn:
-    #     store[i[0]] = i[1]
+        index = aliceIndex[i]
+        encryptedValue = aliceIn[i]
+        store[index] = bruteForceDecrypt(w[index], encryptedValue)
 
     # encrypt bob's input with the P's and store these values into our store.
     for i in range(len(inputs)):
         index = bobIndex[i]
         encryptedValue = inputs[i]
-        for wAttempt in w[index]:
-            try:
-                value = int(fern.decryptInput(wAttempt,encryptedValue))
-                store[index] = value
-            except:
-                pass
-
-    # for i in range(len(inputs)):
-    #     index = bobIndex[i]
-    #     value = inputs[i]
-    #     store[index]=value
-
-    # for i in range(len(gateSet)):
-    #     # get gate value.
-    #     gate = gateSet[i]
-    #     table = tables[i]
-    #     # get gate id
-    #     index = gate['id']
-    #     # get inputs
-    #     inputs = tuple([(i,store[i]) for i in gate['in']])
-
-    #     output = table[inputs]
-    #     # store output
-    #     store[index] = output
+        store[index] = bruteForceDecrypt(w[index], encryptedValue)
 
     # # iterate through the gates
     for i in range(len(gateSet)):
@@ -116,6 +80,9 @@ def bobHandler(data,inputs=[1]):
         gate = gateSet[i]
         # initialise inputs
         inputs = [(i,store[i]) for i in gate['in']]
+        print("gate in:", gate['in'])
+        print("so the input is:",inputs)
+        # print("inputs:",inputs)
         # get garbled table for this gate
         table = tables[i]
         # compute value
@@ -126,10 +93,11 @@ def bobHandler(data,inputs=[1]):
 
     # retrieve output and decrypt it.
     decryptedOutputs = []
-    for i in range(len(data['out'])):
-        index = data['out'][i]
+    for i in range(len(data['outIndex'])):
+        index = data['outIndex'][i]
         value = store[index]
-        pVal  = outputDecryption[i]
+        pVal  = outputP[i]
+        print("OUTPUT i",index,"v:",value,"p",pVal)
         decryptedValue = xor(value,pVal)
         decryptedOutputs.append(decryptedValue)
 

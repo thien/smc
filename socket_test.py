@@ -198,6 +198,7 @@ if __name__ == "__main__":
             print("circ name:", circ.name)
             if "NOT" in circ.name:
                 continue
+            print("P VALUE:", circ.p)
             # setup alices bits (do an iteration)
             alicesPotentialBits = perms(len(circ.alice))
 
@@ -217,7 +218,6 @@ if __name__ == "__main__":
                     # start oblivious transfers
                     for i in range(len(garbledCircuit['bobIndex'])):
                         bobI = garbledCircuit['bobIndex'][i]
-                        print("Bob Index")
                         bobsValue = bobBits[i]
                         # get the zero and one values from the garbled circuit.
                         input1, input2 = referenceTable[(bobI,0)],referenceTable[(bobI,1)]
@@ -240,8 +240,7 @@ if __name__ == "__main__":
                     # receive bob's evaluation to see whether the output 
                     # is the same.
                     # if it's the same then it works.
-                    print("A:",aliceBits, "B:",bobBits, "OUT:",output)
+                    print("A real:",aliceBits, "B real:",bobBits, "OUT:",output)
                     # break
                 # break
-
-        
+            break
