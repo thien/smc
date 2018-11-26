@@ -155,8 +155,6 @@ class Circuit:
                     value = self.xor(value,self.p[wire])
                     encryptedValue = fern.encryptInput(self.w[wire][value], value)
                     encryptedInput.append((wire,encryptedValue))
-                    # print result
-                    # print("wire:", wire, "val:",value, " p["+str(wire)+"]:",self.p[wire], "w:", self.w[wire][value][-10:-2],"enc:",encryptedValue[-10:-2])
                 
                 # use the raw data as the tuple
                 parameters = tuple(binaryInputs)
@@ -174,6 +172,8 @@ class Circuit:
         return garbledTables
 
     def setupBobOT(self,bobIndex):
+        # sets up appropiate variables to perform
+        # oblivious transfer with.
         pValue = self.p[bobIndex]
         x = self.xor(pValue, 0)
         y = self.xor(pValue, 1)
@@ -182,8 +182,9 @@ class Circuit:
     def sendToBob(self,aliceInput):
         # garble the table
         garbled = self.generateGarbledCiruitTables()
-        # get wire keys
+        # get wire keys (but bob doesn't know the p values.)
         w = self.w
+
         # get alice's encrypted bits
         encryptedBits = []
         
@@ -198,9 +199,6 @@ class Circuit:
             # xor before encryption..
             aliceValue = self.xor(aliceValue, self.p[aliceWire])
             encryptedValue = fern.encryptInput(self.w[aliceWire][aliceValue], aliceValue)
-            # print data
-            # print("AWir:", aliceWire, "val:", aliceValue, " p["+str(aliceWire)+"]:", self.p[aliceWire], "w:",self.w[aliceWire][aliceValue][-10:-2], "enc:", encryptedValue[-10:-2])
-
             encryptedBits.append(encryptedValue)
             
         # get decryption bit for output wire
@@ -210,22 +208,9 @@ class Circuit:
         gateSet = copy.deepcopy(self.gates)
         for i in range(len(gateSet)):
             gateSet[i].pop('type', None)
-        
-        # setup bob p
-        bobP = [self.p[k] for k in self.bob]
 
-        # generate p encrypted values for all of bob's possible inputs.
-        bobPossibleInputs = self.perms(len(self.bob))
-        bobPotentialP = {}
-        for inp in bobPossibleInputs:
-            P_enc = []
-            for index in range(len(self.bob)):
-                pValue = bobP[index]
-                value = inp[index]
-                encryptedValue = self.xor(pValue, value)
-                P_enc.append(encryptedValue)
-            rawInpt = tuple(inp)
-            bobPotentialP[rawInpt] = P_enc
+        # count number of indexes needed to create the store.
+        storeSize = max([max(self.out), max([i['id'] for i in self.gates])])
 
         return {
             'table'  : garbled,
@@ -233,10 +218,9 @@ class Circuit:
             'aliceIn': encryptedBits,
             'aliceIndex' : self.alice,
             'bobIndex' : self.bob,
-            'bobPotentialP' : bobPotentialP,
+            'out': self.out,
             'gateSet' : gateSet,
-            'numberOfIndexes' : max([max(self.out),max([i['id'] for i in self.gates])]),
-            'out' : self.out,
+            'numberOfIndexes': storeSize,
             'outputDecryption': outputDecryptionBits
         }
         
@@ -266,7 +250,7 @@ class Circuit:
 
 
 if __name__ == "__main__":
-    folderpath = "../json"
+    folderpath = "json"
     for file in os.listdir(folderpath):
         filename = os.path.join(folderpath,file)
         with open(filename) as json_file:
@@ -275,13 +259,5 @@ if __name__ == "__main__":
                 circuit = Circuit(json_circuit)
 #         print(circuit.name)
                 if "Smart" in circuit.name:
-#             circuit.printRow([0,0], [0,0])
                     circuit.printall(encrypt=False)
-    #         print(circuit.p)
-    #         garble  = GarbledCircuit(circuit)
-    #         print(circuit.raw)
                 break
-        
-	#     break
-    
-	# loadall()

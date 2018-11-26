@@ -56,30 +56,21 @@ def evaluate(data,inputs=[1], pinputs=None):
     # setup store.
     store = [0 for i in range(data['numberOfIndexes']+1)]
 
+    # store bob's encrypted values.
     if pinputs:
         for i in range(len(pinputs)):
             value = pinputs[i]
             index = bobIndex[i]
             store[index] = value
-    else:
-        # encrypt bob's input with the P's and store these values into our store.
-        # for i in range(len(inputs)):
-        #     index = bobIndex[i]
-        #     value = xor(data['bobP'][i],inputs[i])
-        #     store[index]=value
-        print("?")
 
-    # store alices input in the store array.
+    # store alices encrypted inputs.
     for i in range(len(aliceIndex)):
         # bruteforce the table to find the matching key corresponding to
-        # alice's encrypted input.
-        for wAttempt in w[aliceIndex[i]]:
-            try:
-                value = int(fern.decryptInput(wAttempt,aliceIn[i]))
-                index = aliceIndex[i]
-                store[index] = value
-            except:
-                pass
+        # alice's encrypted input (which is encrypted with a p value)
+        # which we don't know of anyway.
+        index = aliceIndex[i]
+        value = int(bruteForceDecrypt(w[aliceIndex[i]], aliceIn[i]))
+        store[index] = value
 
     # iterate through the gates
     for i in range(len(gateSet)):

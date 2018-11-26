@@ -43,7 +43,9 @@ def stringToList(ku):
     return ast.literal_eval(ku)
 
 if __name__ == "__main__":
-    
+    """
+    Used for testing purposes.
+    """
 
     key = Fernet.generate_key()
     f = Fernet(key)
@@ -56,25 +58,7 @@ if __name__ == "__main__":
     print("ENCRYPTED:",token)
     print(f.encrypt(inp.encode('utf-8')))
 
-
-    # fernInput = encode(token)
-    # print(binaryFormat)
-    # ku = XOR(XOR(fernInput))
-    # ku = fernetXOR(fernInput)
-    # kustr = toString(ku)
-
-    # ku = decodeFernetXOR(ku)
-    # print("KU       :",kustr)
-
-    # kude = stringToList(kustr)
-
-    # ku = decode(kude)
-
     decrp = f.decrypt(token)
 
     print("DECRYPTED:",decrp.decode('utf-8'))
     print()
-    print()
-    print()
-
-    # print(fernetXOR2(fernetXOR2(token)))
