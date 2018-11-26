@@ -202,8 +202,6 @@ class Circuit:
     def sendToBob(self,aliceInput):
         # garble the table
         garbled = self.generateGarbledCiruitTables()
-        # get wire keys (but bob doesn't know the p values.)
-        w = self.w
 
         # get alice's encrypted bits
         encryptedBits = []
@@ -237,7 +235,6 @@ class Circuit:
         return {
             'aliceW' : aliceW,
             'table'  : garbled,
-            'w'      : w,
             'aliceIn': encryptedBits,
             'aliceIndex' : self.alice,
             'bobIndex' : self.bob,
