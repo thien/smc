@@ -27,20 +27,18 @@ for file in os.listdir(folderpath):
         json_circuits = json.load(json_file)
 
     for json_circuit in json_circuits['circuits']:
-        if "2-bit full adder" in json_circuit['name']:
+        if " " in json_circuit['name']:
             circuit = c.Circuit(json_circuit)
             print("----------------")
             print(json_circuit['name'])
-            # print("Alice:",json_circuit['alice'],"\t","Bob:",json_circuit['bob'])
-            # print("Generating Alice's Values")
             
-            for x in perms(len(json_circuit['alice'])):
-                aliceInput = x
-                # print("Sending encrypted response to Bob")
+            for aliceInput in perms(len(json_circuit['alice'])):
+                # build relevant files needed to send to bob
                 toBob = circuit.sendToBob(aliceInput)
-                # print("Generating Bob's Values")
-
+                # iterate through bob's potential inputs.
                 for bobInput in perms(len(json_circuit['bob'])):
+                    # get the reference output to verify the results.
+                    test = circuit.compute(aliceInput + bobInput)
                     # do oblivious transfer on this.
                     bobPInput = []
                     for i in range(len(bobInput)):
@@ -51,14 +49,19 @@ for file in os.listdir(folderpath):
                         inp1, inp2 = circuit.setupBobOT(bobIndex)
                         otA = ot.Alice(inp1, inp2)
                         # garbled circuit stuff.
-                        c = otA.send_c()
-                        h0 = otB.send_h0(c)
+                        ot_c = otA.send_c()
+                        h0 = otB.send_h0(ot_c)
                         c_1, E, length = otA.sendMessage(h0)
                         payload = int(otB.getMessage(c_1, E, length))
                         bobPInput.append(payload)
-
-                    output = bobHandler.bobHandler(toBob,inputs=bobInput, pinputs=bobPInput)
-
-                    print("Alice:",aliceInput," Bob",bobInput,":- ",output)
+                    # bob evaluates the output.
+                    output = bobHandler.bobHandler(toBob,pinputs=bobPInput)
+                    # create checksum to determine whether
+                    # our output is the same as the input.
+                    check = True if test == output else False
+                    if check:
+                        print("Alice:",aliceInput," Bob",bobInput,":- ",output)
+                    else:
+                        print("The garbled circuit does not compute.")
             # break
     # break
