@@ -60,6 +60,21 @@ def bits(num, width):			# convert number into a list of bits
   # use [int(k) for k in format(num, 'b').zfill(width)] for older Pythons
   return [int(k) for k in f'{num:0{width}b}']
 
+def perms(n):
+  """
+  Helper function to generate permutations for binary integers
+  based on the length n.
+  """
+  if not n:
+    return
+  entries = []
+  for i in range(2**n):
+    s = bin(i)[2:]
+    s = "0" * (n-len(s)) + s
+    ent = [int(i) for i in s]
+    entries.append(ent)
+  return entries
+
 class PrimeGroup:
   # cyclic abelian group of prime order i.e. order totient(p)=p-1
 
@@ -97,10 +112,10 @@ class PrimeGroup:
       else:
         return candidate
 
-if sys.argv[1] == 'alice':		# one group is sufficient
-  prime_group = PrimeGroup()		# singleton, simpler than metaclass
-else:
-  prime_group = None			# bob receives group from alice
+# if sys.argv[1] == 'alice':		# one group is sufficient
+#   prime_group = PrimeGroup()		# singleton, simpler than metaclass
+# else:
+#   prime_group = None			# bob receives group from alice
 
 
 # sockets __________________________________________________________________

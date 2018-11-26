@@ -7,7 +7,6 @@ def xor(value, key):
         return 0
     return 1
 
-
 def bruteForceDecrypt(keys,token):
     for key in keys:
         try:
@@ -48,7 +47,7 @@ def displayTables(table):
         for i in table:
             print((i[0][0],i[0][1][-10:-2]),(i[1][0],i[1][1][-10:-2]),":-", (table[i][0],table[i][1][-10:-2]))
 
-def bobHandler(data,inputs=[1], pinputs=None):
+def evaluate(data,inputs=[1], pinputs=None):
     # variables redeclared for simplicity    
     tables, w, aliceIn = data['table'], data['w'], data['aliceIn']
     aliceIndex, bobIndex = data['aliceIndex'], data['bobIndex']

@@ -77,7 +77,7 @@
   { "name": "A implies B",
     "alice": [1],
     "bob":   [2],
-    "out":   [3],
+    "out":   [4],
     "gates": [ 
       { "id":3, "type":"NOT", "in": [1] },
       { "id":4, "type":"OR", "in": [2, 3] } 
@@ -86,7 +86,6 @@
 
   { "name": "AA' complement",
     "alice": [1],
-    "bob":   [2],
     "out":   [3],
     "gates": [ 
       { "id":2, "type":"NOT", "in": [1] },
@@ -96,7 +95,6 @@
 
   { "name": "A+A' complement",
     "alice": [1],
-    "bob":   [2],
     "out":   [3],
     "gates": [ 
       { "id":2, "type":"NOT", "in": [1] },
