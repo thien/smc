@@ -108,13 +108,13 @@ class Circuit:
             pr = "Alice"+str(self.alice)+" = " 
             for i in alice:
                 pr += str(i) + " "
-            pr += "  Bob"+str(self.bob)+" = "
+            pr += " Bob"+str(self.bob)+" = "
             for i in bob:
                 pr += str(i) + " "
             pr += "  Outputs"+str(self.out)+" = "
             for i in self.compute(inputs, encrypt=encrypt):
                 pr += str(i) + " "
-            print(pr)
+            print("  " + pr + "  ")
         else:
             inputs = alice
             pr = "Alice"+str(self.alice)+" = " 
@@ -123,7 +123,7 @@ class Circuit:
             pr += "  Outputs"+str(self.out)+" = "
             for i in self.compute(inputs, encrypt=encrypt):
                 pr += str(i) + " "
-            print(pr)
+            print("  " + pr + "  ")
     
     def printall(self, encrypt=False):
         """

@@ -239,7 +239,7 @@ def main():
   if   behaviour == 'alice': alice(filename=sys.argv[2])
   elif behaviour == 'bob':   bob()
   elif behaviour == 'local': local_test(filename=sys.argv[2])
-
+  print()
 if __name__ == '__main__':
   main()
 

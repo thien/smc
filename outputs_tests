@@ -13,8 +13,8 @@ python3 main.py alice	 json/f.bool.json
   Alice[1] = 1  Bob[2] = 1   Outputs[3] = 1 
 
 ======= NOT gate =======
-  Alice[1] = 0  Bob[] =   Outputs[2] = 1 
-  Alice[1] = 1  Bob[] =   Outputs[2] = 0 
+  Alice[1] = 0   Outputs[2] = 1 
+  Alice[1] = 1   Outputs[2] = 0 
 
 ======= XOR gate =======
   Alice[1] = 0  Bob[2] = 0   Outputs[3] = 0 
@@ -53,18 +53,18 @@ python3 main.py alice	 json/f.bool.json
   Alice[1] = 1  Bob[2] = 1   Outputs[4] = 1 
 
 ======= AA' complement =======
-  Alice[1] = 0  Bob[] =   Outputs[3] = 0 
-  Alice[1] = 1  Bob[] =   Outputs[3] = 0 
+  Alice[1] = 0   Outputs[3] = 0 
+  Alice[1] = 1   Outputs[3] = 0 
 
 ======= A+A' complement =======
-  Alice[1] = 0  Bob[] =   Outputs[3] = 1 
-  Alice[1] = 1  Bob[] =   Outputs[3] = 1 
+  Alice[1] = 0   Outputs[3] = 1 
+  Alice[1] = 1   Outputs[3] = 1
 
 python3 main.py alice	 json/f.nand.json
 
 ======= NOT using NAND =======
-  Alice[1] = 0  Bob[] =   Outputs[2] = 1 
-  Alice[1] = 1  Bob[] =   Outputs[2] = 0 
+  Alice[1] = 0   Outputs[2] = 1 
+  Alice[1] = 1   Outputs[2] = 0 
 
 ======= AND using NAND =======
   Alice[1] = 0  Bob[2] = 0   Outputs[4] = 0 
