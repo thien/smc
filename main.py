@@ -27,6 +27,7 @@ def alice(filename):
   def obliviousTransfer(input1, input2):
     alice = ot.Alice(input1, input2)
     # wait until bob is online
+    # print("waiting for bob to send OT_REQ")
     ready = socket.receive()
     if ready:
       # send c
@@ -53,6 +54,9 @@ def alice(filename):
     json_circuits = json.load(json_file)
 
   for json_circuit in json_circuits['circuits']:
+    # print title
+    generateTitle(json_circuit['name'])
+
     # generate permutation of alice's inputs.
     aliceInputs = util.perms(len(json_circuit['alice']))
     for aliceInput in aliceInputs:
@@ -72,9 +76,9 @@ def alice(filename):
           # build relevant files needed to send to bob
           toBob = circuit.sendToBob(aliceInput)
           # send to bob.
-          print("sending circuit")
+          # print("sending circuit")
           socket.send(toBob)
-
+          # print("successfully sent circuit to bob.")
           # wait for an OT request
           for i in range(len(toBob['bobIndex'])):
             bobIndex = toBob['bobIndex'][i]
@@ -101,8 +105,13 @@ def alice(filename):
           # blank message saying that he's ready to go again.
           msg = socket.receive()
           if msg == "AGAIN":
-            print("------------")
-    pass
+            # bob has not finished iterating through his binary
+            # values.
+            pass
+          elif msg == "DONE":
+            print("bob has finished iterating through his parts.")
+  socket.send("DONE")
+  pass
 
 # Bob is the circuit evaluator (server) ____________________________________
 
@@ -111,6 +120,7 @@ def bob():
     # set up ot class for Bob
     bob = ot.Bob(inputIndex)
     # set up ready.
+    # print("sending OT Request")
     socket.send("OT_REQUEST")
     # wait to receive c value
     ot_c = socket.receive()
@@ -130,8 +140,18 @@ def bob():
   socket = util.ServerSocket()
   util.log(f'Bob: Listening ...')
   print("Listening for Alice..")
+  print("waiting to receive primary payload from alice..")
+  payload = socket.receive()
   while True:
-    payload = socket.receive()
+    if isinstance(payload,dict):
+      print("Received primary payload from alice.")
+    else:
+      if payload == "DONE":
+        print("I've finished computing the things I needed to do.")
+        break
+      else:
+        print("uh, got this:",payload)
+
     for bobInput in util.perms(len(payload['bobIndex'])):
       # set up input variables needed to compute the garbled circ.
       bobPInput = []
@@ -156,8 +176,8 @@ def bob():
         print("I computed the right thing!")
       # either way, tell alice you're ready to receive again.
       socket.send("AGAIN")
-      # bob'll receive the payload again which will restart the loop.
       payload = socket.receive()
+    # socket.send("DONE")
         
 # local test of circuit generation and evaluation, no transfers_____________
 
