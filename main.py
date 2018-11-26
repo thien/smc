@@ -1,4 +1,10 @@
 
+"""
+Submission by:
+Thien Nguyen (tn518 / 01565994)
+Jinwei Zhang (jz2618 / 01540854)
+"""
+
 # yao garbled circuit evaluation v1. simple version based on smart
 # naranker dulay, dept of computing, imperial college, october 2018
 
@@ -62,7 +68,8 @@ def alice(filename):
       if not 'bob' in json_circuit:
         # set up circuit.
         circuit = c.Circuit(json_circuit)
-        # bob is not involved in this circuit so theres no point computing our encrypted transfer.
+        # bob is not involved in this circuit so theres no point computing
+        # our encrypted transfer.
         circuit.printRow(aliceInput, None)
       else:
         # alice will assume that bob will compute these values:
@@ -80,7 +87,7 @@ def alice(filename):
             bobIndex = toBob['bobIndex'][i]
             inp1, inp2 = circuit.setupBobOT(bobIndex)
             obliviousTransfer(inp1, inp2)
-   
+
           # Bob will send a payload saying that he's ready.
           socket.receive()
           socket.send("OK")
@@ -95,7 +102,7 @@ def alice(filename):
             circuit.printRow(aliceInput, bobInput)
             socket.send(True)
           else:
-            print("ERROR: The garbled circuit does not compute.", test, output)
+            print("ERROR: The circuit does not compute.", test, output)
             socket.send(False)
           # blank message saying that he's ready to go again.
           msg = socket.receive()
@@ -142,11 +149,13 @@ def bob():
       print("Received primary payload from alice.")
     else:
       if payload == "DONE":
-        print("I've finished computing the things I needed to do\n\tfor this garbled circuit.")
-        print("Please run me again if you wish to evaluate a different circuit.")
+        print("I've finished computing the things I needed to do")
+        print("\tfor this garbled circuit.")
+        print("Please run me again if you wish to evaluate a")
+        print("\tdifferent circuit.")
         break
       else:
-        print("Received unexpected value:",payload)
+        print("Received unexpected value:", payload)
 
     for bobInput in util.perms(len(payload['bobIndex'])):
       # set up input variables needed to compute the garbled circ.
@@ -172,7 +181,7 @@ def bob():
       # either way, tell alice you're ready to receive again.
       socket.send("AGAIN")
       payload = socket.receive()
-        
+
 # local test of circuit generation and evaluation, no transfers_____________
 
 def local_test(filename):
@@ -219,7 +228,8 @@ def local_test(filename):
           else:
             print("ERROR: The garbled circuit does not compute.")
       else:
-        # bob is not involved in this circuit so theres no point computing our encrypted transfer.
+        # bob is not involved in this circuit so theres no point 
+        # computing our encrypted transfer.
         circuit.printRow(aliceInput, None)
 
 # main _____________________________________________________________________

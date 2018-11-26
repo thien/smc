@@ -7,6 +7,12 @@ import random
 import array
 import copy
 
+"""
+Submission by:
+Thien Nguyen (tn518 / 01565994)
+Jinwei Zhang (jz2618 / 01540854)
+"""
+
 class Circuit:
     def __init__(self,circuitDict, pBitOverride=None):
         """

@@ -1,3 +1,9 @@
+"""
+Submission by:
+Thien Nguyen (tn518 / 01565994)
+Jinwei Zhang (jz2618 / 01540854)
+"""
+
 class Gates:
     
     def NOT(self, tup):

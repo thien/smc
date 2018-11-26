@@ -1,5 +1,5 @@
 
-{ "+": "Millionaires Problem, Thien Nguyen 2018",
+{ "+": "Millionaires Problem, Thien Nguyen/Jinwei Zhang 2018",
 
   "circuits" : [
   { "name": "2-bit Millionaires Problem Cin, A0, B0, A1, B1 -> Cout",
