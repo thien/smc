@@ -32,15 +32,20 @@ def alice(filename):
       # send c
       ot_c = alice.send_c()
       socket.send(ot_c)
-      print("sent c:",ot_c)
       # wait for bob to send H0 so that we can receive it.
       h0 = socket.receive()
-      print("received h0:", h0)
       # compute c_1, E, length
       c_1, E, length = alice.sendMessage(h0)
       # send c_1, E, length to Bob.
       payload = (c_1, E, length)
       socket.send(payload)
+
+  def basicTransfer(input1, input2):
+    payload = socket.receive()
+    if payload == 0:
+      socket.send(input1)
+    else:
+      socket.send(input2)
 
   socket = util.ClientSocket()
 
@@ -60,7 +65,6 @@ def alice(filename):
       else:
         # alice will assume that bob will compute these values:
         for bobInput in util.perms(len(json_circuit['bob'])):
-          print("Bob Input:", bobInput)
           # set up circuit.
           circuit = c.Circuit(json_circuit)
           # calculate the reference output
@@ -70,13 +74,13 @@ def alice(filename):
           # send to bob.
           print("sending circuit")
           socket.send(toBob)
+
           # wait for an OT request
-          print("doing OT")
           for i in range(len(toBob['bobIndex'])):
             bobIndex = toBob['bobIndex'][i]
-            print("working on index",bobIndex)
             inp1, inp2 = circuit.setupBobOT(bobIndex)
             obliviousTransfer(inp1, inp2)
+            # basicTransfer(inp1,inp2)
    
           # Bob will send a payload saying that he's ready.
           socket.receive()
@@ -110,10 +114,8 @@ def bob():
     socket.send("OT_REQUEST")
     # wait to receive c value
     ot_c = socket.receive()
-    print("received c:",ot_c)
     # generate H0
     H0 = bob.send_h0(ot_c)
-    print("sent h0:", H0)
     # send H0 to alice
     socket.send(H0)
     # wait for Alice to send h0, E, length as a payload
@@ -121,25 +123,24 @@ def bob():
     # compute response
     message = bob.getMessage(c_1, E, length).decode()
     return message
+  def basicTransfer(inputIndex):
+    socket.send(inputIndex)
+    return socket.receive()
 
   socket = util.ServerSocket()
   util.log(f'Bob: Listening ...')
   print("Listening for Alice..")
   while True:
     payload = socket.receive()
-    permutations = util.perms(len(payload['bobIndex']))
-    for p in range(len(permutations)):
-      bobInput = permutations[p]
-      print("My input:",bobInput)
+    for bobInput in util.perms(len(payload['bobIndex'])):
       # set up input variables needed to compute the garbled circ.
       bobPInput = []
-      print("computing obl trans")
       for i in range(len(bobInput)):
+        bobIndex = payload['bobIndex'][i]
         bobValue = bobInput[i]
-        print("working on input value", bobValue)
         value = obliviousTransferB(bobValue)
-        bobPInput.append(value)
-
+        # value = basicTransfer(bobValue)
+        bobPInput.append(int(value))
       # tell Alice i'm ready to evaluate the output.
       socket.send("READY")
       msg = socket.receive()
