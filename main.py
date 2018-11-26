@@ -74,15 +74,12 @@ def alice(filename):
           # build relevant files needed to send to bob
           toBob = circuit.sendToBob(aliceInput)
           # send to bob.
-          # print("sending circuit")
           socket.send(toBob)
-          # print("successfully sent circuit to bob.")
           # wait for an OT request
           for i in range(len(toBob['bobIndex'])):
             bobIndex = toBob['bobIndex'][i]
             inp1, inp2 = circuit.setupBobOT(bobIndex)
             obliviousTransfer(inp1, inp2)
-            # basicTransfer(inp1,inp2)
    
           # Bob will send a payload saying that he's ready.
           socket.receive()
@@ -118,7 +115,6 @@ def bob():
     # set up ot class for Bob
     bob = ot.Bob(inputIndex)
     # set up ready.
-    # print("sending OT Request")
     socket.send("OT_REQUEST")
     # wait to receive c value
     ot_c = socket.receive()
@@ -131,6 +127,7 @@ def bob():
     # compute response
     message = bob.getMessage(c_1, E, length).decode()
     return message
+
   def basicTransfer(inputIndex):
     socket.send(inputIndex)
     return socket.receive()
@@ -155,7 +152,6 @@ def bob():
       # set up input variables needed to compute the garbled circ.
       bobPInput = []
       for i in range(len(bobInput)):
-        bobIndex = payload['bobIndex'][i]
         bobValue = bobInput[i]
         value = obliviousTransferB(bobValue)
         # value = basicTransfer(bobValue)
