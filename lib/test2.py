@@ -33,35 +33,41 @@ for file in os.listdir(folderpath):
             print(json_circuit['name'])
             
             for aliceInput in perms(len(json_circuit['alice'])):
-                # build relevant files needed to send to bob
-                toBob = circuit.sendToBob(aliceInput)
-                # iterate through bob's potential inputs.
-                for bobInput in perms(len(json_circuit['bob'])):
-                    # get the reference output to verify the results.
-                    test = circuit.compute(aliceInput + bobInput)
-                    # do oblivious transfer on this.
-                    bobPInput = []
-                    for i in range(len(bobInput)):
-                        bobValue = bobInput[i]
-                        bobIndex = toBob['bobIndex'][i]
-                        # print("bobV", bobValue, "bobI",bobIndex)
-                        otB = ot.Bob(bobValue)
-                        inp1, inp2 = circuit.setupBobOT(bobIndex)
-                        otA = ot.Alice(inp1, inp2)
-                        # garbled circuit stuff.
-                        ot_c = otA.send_c()
-                        h0 = otB.send_h0(ot_c)
-                        c_1, E, length = otA.sendMessage(h0)
-                        payload = int(otB.getMessage(c_1, E, length))
-                        bobPInput.append(payload)
-                    # bob evaluates the output.
-                    output = bobHandler.bobHandler(toBob,pinputs=bobPInput)
-                    # create checksum to determine whether
-                    # our output is the same as the input.
-                    check = True if test == output else False
-                    if check:
-                        print("Alice:",aliceInput," Bob",bobInput,":- ",output)
-                    else:
-                        print("The garbled circuit does not compute.")
+                # check whether this circuit involves bob.
+                if circuit.bob:
+                    # build relevant files needed to send to bob
+                    toBob = circuit.sendToBob(aliceInput)
+                    # iterate through bob's potential inputs.
+                    for bobInput in perms(len(json_circuit['bob'])):
+                        # get the reference output to verify the results.
+                        test = circuit.compute(aliceInput + bobInput)
+                        # do oblivious transfer on this.
+                        bobPInput = []
+                        for i in range(len(bobInput)):
+                            bobValue = bobInput[i]
+                            bobIndex = toBob['bobIndex'][i]
+                            otB = ot.Bob(bobValue)
+                            inp1, inp2 = circuit.setupBobOT(bobIndex)
+                            otA = ot.Alice(inp1, inp2)
+                            # garbled circuit stuff.
+                            ot_c = otA.send_c()
+                            h0 = otB.send_h0(ot_c)
+                            c_1, E, length = otA.sendMessage(h0)
+                            payload = int(otB.getMessage(c_1, E, length))
+                            bobPInput.append(payload)
+                        # bob evaluates the output.
+                        output = bobHandler.bobHandler(toBob,pinputs=bobPInput)
+                        # create checksum to determine whether
+                        # our output is the same as the input.
+                        check = True if test == output else False
+                        if check:
+                            # the computation is equivalent;
+                            # Alice will compute the truth table.
+                            circuit.printRow(aliceInput,bobInput)
+                        else:
+                            print("ERROR: The garbled circuit does not compute.")
+                else:
+                    # bob is not involved in this circuit so theres no point computing our encrypted transfer.
+                    circuit.printRow(aliceInput, None)
             # break
     # break

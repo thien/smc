@@ -211,9 +211,6 @@ class Circuit:
         for i in range(len(gateSet)):
             gateSet[i].pop('type', None)
         
-        # get the p values for wires corresponding to bob's inputs.
-        bobColouringValues = [self.p[i] for i in self.bob]
-
         # setup bob p
         bobP = [self.p[k] for k in self.bob]
 
