@@ -172,8 +172,13 @@ class Circuit:
                 gateTables[dictionaryInput] = dictionaryOutput
             garbledTables.append(gateTables)
         return garbledTables
-        
-        
+
+    def setupBobOT(self,bobIndex):
+        pValue = self.p[bobIndex]
+        x = self.xor(pValue, 0)
+        y = self.xor(pValue, 1)
+        return str(x).encode(), str(y).encode()
+
     def sendToBob(self,aliceInput):
         # garble the table
         garbled = self.generateGarbledCiruitTables()
