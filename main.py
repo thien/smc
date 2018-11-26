@@ -150,7 +150,7 @@ def bob():
         print("I've finished computing the things I needed to do.")
         break
       else:
-        print("uh, got this:",payload)
+        print("Received unexpected value:",payload)
 
     for bobInput in util.perms(len(payload['bobIndex'])):
       # set up input variables needed to compute the garbled circ.
@@ -171,13 +171,12 @@ def bob():
       # receive response checking whether it was right or not.
       check = socket.receive()
       if check is False:
-        print("I computed the wrong thing :'(")
+        print("Incorrect.")
       else:
-        print("I computed the right thing!")
+        print("Correct.")
       # either way, tell alice you're ready to receive again.
       socket.send("AGAIN")
       payload = socket.receive()
-    # socket.send("DONE")
         
 # local test of circuit generation and evaluation, no transfers_____________
 
