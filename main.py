@@ -164,7 +164,7 @@ def bob():
         bobValue = bobInput[i]
         value = obliviousTransferB(bobValue)
         # value = basicTransfer(bobValue)
-        bobPInput.append(int(value))
+        bobPInput.append(value)
       # tell Alice i'm ready to evaluate the output.
       socket.send("READY")
       msg = socket.receive()
@@ -214,8 +214,9 @@ def local_test(filename):
             ot_c = otA.send_c()
             h0 = otB.send_h0(ot_c)
             c_1, E, length = otA.sendMessage(h0)
-            payload = int(otB.getMessage(c_1, E, length))
+            payload = otB.getMessage(c_1, E, length)
             bobPInput.append(payload)
+          # print("PAYLOAD:", bobPInput)
           # bob evaluates the output.
           output = bh.evaluate(toBob,pinputs=bobPInput)
           # create checksum to determine whether

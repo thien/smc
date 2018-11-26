@@ -1,4 +1,4 @@
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, MultiFernet
 import base64
 import ast
 
@@ -17,6 +17,22 @@ def encryptInput(privateKey, value):
 
 def decryptInput(privateKey, token):
     crypt = Fernet(privateKey)
+    return crypt.decrypt(token)
+
+def multiEncryptInput(privateKeys, value):
+    initiateKeys = []
+    for i in privateKeys:
+        initiateKeys.append(Fernet(i))
+    crypt = MultiFernet(initiateKeys)
+    message = str(value).encode('utf-8')
+    encryptedValue = crypt.encrypt(message)
+    return encryptedValue
+
+def multiDecryptInput(privateKeys, token):
+    initiateKeys = []
+    for i in privateKeys:
+        initiateKeys.append(Fernet(i))
+    crypt = MultiFernet(initiateKeys)
     return crypt.decrypt(token)
 
 def binaryXOR(x,y):
