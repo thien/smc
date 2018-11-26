@@ -12,7 +12,7 @@ Then, on a seperate terminal, run alice using the predefined calls in the makefi
 make alice
 ```
 
-I did not include the evaluation of the millionaires problem within the primary call to make it more `diff` friendly but this can be computed with `make alice millions`.
+I did not include the evaluation of the millionaires problem within the primary call to make it more `diff` friendly but this can be computed with `make million`.
 
 The program should work whichever way the execution is performed (i.e it should work if alice is called first and then bob).
 
@@ -24,11 +24,6 @@ thread.
 make local
 ```
 
-To evaluate a single circuit json, add a third argument when running `alice`:
-
-```
-make alice millions
-```
 
 ## Comments
 

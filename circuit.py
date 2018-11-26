@@ -112,7 +112,7 @@ class Circuit:
             for i in bob:
                 pr += str(i) + " "
             pr += "  Outputs"+str(self.out)+" = "
-            for i in self.compute(inputs,encrypt=encrypt):
+            for i in self.compute(inputs, encrypt=encrypt):
                 pr += str(i) + " "
             print(pr)
         else:
@@ -121,7 +121,7 @@ class Circuit:
             for i in alice:
                 pr += str(i) + " "
             pr += "  Outputs"+str(self.out)+" = "
-            for i in self.compute(inputs,encrypt=encrypt):
+            for i in self.compute(inputs, encrypt=encrypt):
                 pr += str(i) + " "
             print(pr)
     
@@ -152,8 +152,7 @@ class Circuit:
             logic = getattr(self.logic,gate['type'])
             # generate permutations of inputs.    
             for binaryInputs in self.perms(len(gate['in'])):
-    
-                encryptedInput = []
+
                 correspondingWKeys = []
                 xoredValues = []
                 # encrypt the values with w, and then XOR with p.
@@ -163,8 +162,8 @@ class Circuit:
                     value = self.xor(value,self.p[wire])
                     xoredValues.append(value)
                     encryptedValue = fern.encryptInput(self.w[wire][value], value)
-                    encryptedInput.append((wire,encryptedValue))
-                    # we need to get the w key corresponding to that p bit value of each of the input encrypted Bits.
+                    # we need to get the w key corresponding to that p bit value of
+                    # each of the input encrypted Bits.
                     correspondingWKeys.append(self.w[wire][value])
                 
                 # use the raw data as the tuple
@@ -178,8 +177,6 @@ class Circuit:
                 # encrypt our wire key
                 wireKey = (self.w[gate['id']][xoredResult], xoredResult)
                 encryptedOutput = fern.multiEncryptInput(correspondingWKeys, wireKey)
-                # encrypt output
-                # encryptedOutput = fern.encryptInput(self.w[gate['id']][result], xoredResult)
                 # generate dictionary entry
                 dictionaryInput = tuple(xoredValues)
                 dictionaryOutput = (gate['id'],encryptedOutput)
@@ -214,8 +211,6 @@ class Circuit:
         if len(aliceInput) != len(self.alice):
             print("Alice's inputs aren't the same size.")
             return
-
-        # print("Generating Alice's encrypted values.")
 
         aliceW = []
         for i in range(len(aliceInput)):
@@ -280,7 +275,7 @@ class Circuit:
 if __name__ == "__main__":
     folderpath = "json"
     for file in os.listdir(folderpath):
-        filename = os.path.join(folderpath,file)
+        filename = os.path.join(folderpath, file)
         with open(filename) as json_file:
             json_circuits = json.load(json_file)
             for json_circuit in json_circuits['circuits']:

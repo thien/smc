@@ -216,7 +216,6 @@ def local_test(filename):
             c_1, E, length = otA.sendMessage(h0)
             payload = otB.getMessage(c_1, E, length)
             bobPInput.append(payload)
-          # print("PAYLOAD:", bobPInput)
           # bob evaluates the output.
           output = bh.evaluate(toBob,pinputs=bobPInput)
           # create checksum to determine whether
