@@ -7,13 +7,11 @@ import sys	# argv
 
 import ot	# alice, bob
 import util	# ClientSocket, log, ServerSocket
-# import yao	# Circuit
 import fern
 import os
 import json
-import circuit as c
-import bobHandler as bh
-
+import circuit as c # yaos garbled circuit
+import evaluator as bh # bob's seperately computed evaluation
 
 
 def generateTitle(string):
@@ -110,7 +108,7 @@ def alice(filename):
             pass
           elif msg == "DONE":
             print("bob has finished iterating through his parts.")
-  socket.send("DONE")
+  # socket.send("DONE")
   pass
 
 # Bob is the circuit evaluator (server) ____________________________________
@@ -147,7 +145,8 @@ def bob():
       print("Received primary payload from alice.")
     else:
       if payload == "DONE":
-        print("I've finished computing the things I needed to do.")
+        print("I've finished computing the things I needed to do\n\tfor this garbled circuit.")
+        print("Please run me again if you wish to evaluate a different circuit.")
         break
       else:
         print("Received unexpected value:",payload)
