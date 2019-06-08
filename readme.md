@@ -1,4 +1,12 @@
-## Readme
+# SMC
+
+This repository contains example code of running secure multi-party computation of boolean circuits with two participants. 
+
+## Install
+
+You may want to install `zmq` and `sympy` via `pip3` prior to running the `makefile`.
+
+## Run
 
 Hopefully we have managed to write our code such that it remains faithful to the setup in the `makefile`. 
 
