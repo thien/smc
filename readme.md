@@ -31,14 +31,3 @@ thread.
 ```
 make local
 ```
-
-
-## Comments
-
-The assignment was quite interesting and fun to work on,
-although there is some differences between the explanations
-on the lecture slides and the cryptography book which created
-some confusion.
-
-We're convinced that the coursework structure overall was well
-though out however. :)
